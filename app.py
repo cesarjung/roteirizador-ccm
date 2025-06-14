@@ -186,7 +186,9 @@ if arquivo:
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
     if st.session_state.rota:
-        st.markdown("<div style='margin-top:-20px;'></div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style='margin-top:-60px; margin-bottom:0px;'></div>
+        """, unsafe_allow_html=True)
         st.subheader("Visualização da Rota")
         rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
 
@@ -209,14 +211,6 @@ if arquivo:
         st_folium(rota_map, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
-        st.markdown("""
-            <style>
-                .element-container:has(.stDataFrame) {
-                    margin-top: -40px;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-
         with st.expander("📜 Ver Roteiro Gerado", expanded=True):
             st.dataframe(st.session_state.df_preview)
             total_final_str = st.session_state.df_preview["Total Acumulado"].iloc[-1]
