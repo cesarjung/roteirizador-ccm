@@ -220,13 +220,13 @@ if arquivo:
         st_folium(rota_map, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
-        st.markdown("<hr style='margin-top:5px;margin-bottom:5px;'>", unsafe_allow_html=True)
-        with st.expander("📝 Ver Roteiro Gerado", expanded=True):
-    st.dataframe(st.session_state.df_preview)
-    total_final = st.session_state.df_preview["Total Acumulado"].iloc[-1]
-            st.success(f"⏱️ Tempo total do roteiro: {total_final}")
-    if pd.to_timedelta(total_final) > timedelta(hours=8, minutes=48):
-                    st.error("⚠️ Tempo total excede o limite de um turno (8h48min).")
+    st.markdown("<hr style='margin-top:5px;margin-bottom:5px;'>", unsafe_allow_html=True)
+    with st.expander("📝 Ver Roteiro Gerado", expanded=True):
+        st.dataframe(st.session_state.df_preview)
+        total_final = st.session_state.df_preview["Total Acumulado"].iloc[-1]
+        st.success(f"⏱️ Tempo total do roteiro: {total_final}")
+        if pd.to_timedelta(total_final) > timedelta(hours=8, minutes=48):
+            st.error("⚠️ Tempo total excede o limite de um turno (8h48min).")
 
     if botao_exportar and st.session_state.df_preview is not None:
         output = io.BytesIO()
