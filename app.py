@@ -16,7 +16,7 @@ with col1:
 with col2:
     st.markdown(
         """
-        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Obras</h1>
+        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Vistorias</h1>
         """,
         unsafe_allow_html=True
     )
@@ -98,6 +98,7 @@ if arquivo:
         tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
         folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
 
+    st.markdown("<div style='margin-bottom:-30px;'></div>", unsafe_allow_html=True)
     saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
 
     if "df_preview" not in st.session_state:
@@ -186,7 +187,7 @@ if arquivo:
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
     if st.session_state.rota:
-        st.markdown("<hr style='margin-top:0;margin-bottom:5px;'>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top:-30px;'></div>", unsafe_allow_html=True)
         with st.container():
             st.subheader("Visualização da Rota")
             rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
@@ -218,7 +219,7 @@ if arquivo:
             </style>
         """, unsafe_allow_html=True)
 
-        with st.expander("📝 Ver Roteiro Gerado", expanded=True):
+        with st.expander("📜 Ver Roteiro Gerado", expanded=True):
             st.dataframe(st.session_state.df_preview)
             total_final_str = st.session_state.df_preview["Total Acumulado"].iloc[-1]
             try:
