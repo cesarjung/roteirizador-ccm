@@ -7,6 +7,7 @@ from shapely.geometry import Point, Polygon
 from datetime import datetime, timedelta
 import openrouteservice
 import io
+import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
 col1, col2 = st.columns([0.15, 0.85])
@@ -190,7 +191,7 @@ if arquivo:
         st.subheader("Roteiro Gerado")
         st.dataframe(st.session_state.df_preview)
 
-    if botao_visualizar and st.session_state.rota:
+    if st.session_state.rota:
         rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
 
         if "features" in st.session_state.rota:
@@ -198,9 +199,6 @@ if arquivo:
                 data=st.session_state.rota,
                 name="Rota"
             ).add_to(rota_map)
-        else:
-            st.warning("Rota não encontrada ou mal formatada.")
-            st.stop()
 
         folium.Marker(
             location=[st.session_state.lat0, st.session_state.lon0],
