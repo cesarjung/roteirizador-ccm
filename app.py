@@ -63,11 +63,9 @@ with col_out:
 
 arquivo = st.file_uploader("Selecione o arquivo Excel:", type=["xlsx"])
 
-col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 1])
+col_bt1, _, col_bt3 = st.columns([1, 1, 1])
 with col_bt1:
     botao_roteirizar = st.button("Atualizar Rota")
-with col_bt2:
-    botao_visualizar = st.button("Visualizar Rota")
 with col_bt3:
     botao_exportar = st.button("Exportar Rota")
 
@@ -187,11 +185,9 @@ if arquivo:
         st.session_state.lat1 = lat1 if ponto_chegada_input else None
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
-    if st.session_state.df_preview is not None:
-        st.subheader("Roteiro Gerado")
-        st.dataframe(st.session_state.df_preview)
-
     if st.session_state.rota:
+        st.markdown("<hr style='margin-top:0;margin-bottom:5px;'>", unsafe_allow_html=True)
+        st.subheader("Visualização da Rota")
         rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
 
         if "features" in st.session_state.rota:
@@ -213,17 +209,30 @@ if arquivo:
                 icon=folium.Icon(color="red")
             ).add_to(rota_map)
 
-        for _, row in st.session_state.df_filtrado.iterrows():
-            cor = cor_por_tipo.get(str(row.get("TIPO", "")).strip(), "gray")
-            tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
-            folium.Marker(
+        for idx, row in st.session_state.df_filtrado.reset_index(drop=True).iterrows():
+        tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
+        folium.Marker(
+            location=[row["Latitude"], row["Longitude"]],
+            tooltip=tooltip_text,
+            icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
+        ).add_to(rota_map)
                 location=[row["Latitude"], row["Longitude"]],
                 tooltip=tooltip_text,
                 icon=folium.Icon(color=cor)
             ).add_to(rota_map)
 
-        st.subheader("Visualização da Rota")
         st_folium(rota_map, width=1400, height=600)
+
+    if st.session_state.df_preview is not None:
+    st.markdown("<hr style='margin-top:5px;margin-bottom:5px;'>", unsafe_allow_html=True)
+    with st.expander("📝 Ver Roteiro Gerado", expanded=True):
+        st.dataframe(st.session_state.df_preview)
+
+    total_final = st.session_state.df_preview["Total Acumulado"].iloc[-1]
+    st.success(f"⏱️ Tempo total do roteiro: {total_final}")
+
+    if pd.to_timedelta(total_final) > timedelta(hours=8, minutes=48):
+        st.error("⚠️ Tempo total excede o limite de um turno (8h48min).")
 
     if botao_exportar and st.session_state.df_preview is not None:
         output = io.BytesIO()
