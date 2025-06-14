@@ -16,7 +16,7 @@ with col1:
 with col2:
     st.markdown(
         """
-        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Obras</h1>
+        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Vistorias</h1>
         """,
         unsafe_allow_html=True
     )
@@ -186,28 +186,27 @@ if arquivo:
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
     if st.session_state.rota:
-        with st.container():
-            st.markdown("<div style='margin-top:-20px;'></div>", unsafe_allow_html=True)
-            st.subheader("Visualização da Rota")
-            rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
+        st.markdown("<div style='margin-top:-60px;'></div>", unsafe_allow_html=True)
+        st.subheader("Visualização da Rota")
+        rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
 
-            if "features" in st.session_state.rota:
-                folium.GeoJson(data=st.session_state.rota, name="Rota").add_to(rota_map)
+        if "features" in st.session_state.rota:
+            folium.GeoJson(data=st.session_state.rota, name="Rota").add_to(rota_map)
 
-            folium.Marker(location=[st.session_state.lat0, st.session_state.lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(rota_map)
+        folium.Marker(location=[st.session_state.lat0, st.session_state.lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(rota_map)
 
-            if st.session_state.lat1 and st.session_state.lon1:
-                folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(rota_map)
+        if st.session_state.lat1 and st.session_state.lon1:
+            folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(rota_map)
 
-            for idx, row in st.session_state.df_preview.iterrows():
-                tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
-                folium.Marker(
-                    location=[row["Latitude"], row["Longitude"]],
-                    tooltip=tooltip_text,
-                    icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
-                ).add_to(rota_map)
+        for idx, row in st.session_state.df_preview.iterrows():
+            tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
+            folium.Marker(
+                location=[row["Latitude"], row["Longitude"]],
+                tooltip=tooltip_text,
+                icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
+            ).add_to(rota_map)
 
-            st_folium(rota_map, width=1400, height=600)
+        st_folium(rota_map, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
         st.markdown("""
