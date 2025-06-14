@@ -209,17 +209,13 @@ if arquivo:
                 icon=folium.Icon(color="red")
             ).add_to(rota_map)
 
-        for idx, row in st.session_state.df_filtrado.reset_index(drop=True).iterrows():
-    tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
+        for idx, row in st.session_state.df_preview.iterrows():
+    tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
     folium.Marker(
         location=[row["Latitude"], row["Longitude"]],
         tooltip=tooltip_text,
         icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
     ).add_to(rota_map)
-                location=[row["Latitude"], row["Longitude"]],
-                tooltip=tooltip_text,
-                icon=folium.Icon(color=cor)
-            ).add_to(rota_map)
 
         st_folium(rota_map, width=1400, height=600)
 
