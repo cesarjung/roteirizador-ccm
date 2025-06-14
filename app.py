@@ -210,18 +210,18 @@ if arquivo:
             ).add_to(rota_map)
 
         for idx, row in st.session_state.df_preview.iterrows():
-    tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
-    folium.Marker(
-        location=[row["Latitude"], row["Longitude"]],
-        tooltip=tooltip_text,
-        icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
-    ).add_to(rota_map)
+            tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
+            folium.Marker(
+                location=[row["Latitude"], row["Longitude"]],
+                tooltip=tooltip_text,
+                icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
+            ).add_to(rota_map)
 
         st_folium(rota_map, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
-    st.markdown("<hr style='margin-top:5px;margin-bottom:5px;'>", unsafe_allow_html=True)
-    with st.expander("📝 Ver Roteiro Gerado", expanded=True):
+        st.markdown("<hr style='margin-top:5px;margin-bottom:5px;'>", unsafe_allow_html=True)
+        with st.expander("📝 Ver Roteiro Gerado", expanded=True):
         st.dataframe(st.session_state.df_preview)
         total_final = st.session_state.df_preview["Total Acumulado"].iloc[-1]
         st.success(f"⏱️ Tempo total do roteiro: {total_final}")
