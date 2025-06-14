@@ -4,3 +4,4 @@ folium
 openrouteservice
 shapely
 streamlit-folium
+openpyxl
