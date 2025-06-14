@@ -228,7 +228,7 @@ if arquivo:
         if pd.to_timedelta(total_final) > timedelta(hours=8, minutes=48):
             st.error("⚠️ Tempo total excede o limite de um turno (8h48min).")
 
-    if botao_exportar and st.session_state.df_preview is not None:
+    if botao_exportar and st.session_state.df_preview is not None: and st.session_state.df_preview is not None:
         output = io.BytesIO()
         st.session_state.df_preview.to_excel(output, index=False)
         st.download_button("Clique para baixar o roteiro", output.getvalue(), file_name="roteiro.xlsx")
