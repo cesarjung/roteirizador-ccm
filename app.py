@@ -98,7 +98,6 @@ if arquivo:
         tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
         folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
 
-    st.markdown("<div style='margin-bottom:-10px;'></div>", unsafe_allow_html=True)
     saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
 
     if "df_preview" not in st.session_state:
@@ -187,8 +186,8 @@ if arquivo:
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
     if st.session_state.rota:
-        st.markdown("<div style='margin-top:-40px;'></div>", unsafe_allow_html=True)
         with st.container():
+            st.markdown("<div style='margin-top:-20px;'></div>", unsafe_allow_html=True)
             st.subheader("Visualização da Rota")
             rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
 
@@ -208,7 +207,6 @@ if arquivo:
                     icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
                 ).add_to(rota_map)
 
-            st.markdown("<div style='margin-bottom:-20px;'></div>", unsafe_allow_html=True)
             st_folium(rota_map, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
