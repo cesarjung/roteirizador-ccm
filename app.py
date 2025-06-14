@@ -223,10 +223,14 @@ if arquivo:
         st.markdown("<hr style='margin-top:5px;margin-bottom:5px;'>", unsafe_allow_html=True)
         with st.expander("📝 Ver Roteiro Gerado", expanded=True):
             st.dataframe(st.session_state.df_preview)
-            total_final = st.session_state.df_preview["Total Acumulado"].iloc[-1]
-            st.success(f"⏱️ Tempo total do roteiro: {total_final}")
-            if pd.to_timedelta(total_final) > timedelta(hours=8, minutes=48):
-                st.error("⚠️ Tempo total excede o limite de um turno (8h48min).")
+            total_final_str = st.session_state.df_preview["Total Acumulado"].iloc[-1]
+            try:
+                total_final_td = pd.to_timedelta("00:" + total_final_str) if len(total_final_str) <= 5 else pd.to_timedelta(total_final_str)
+                st.success(f"⏱️ Tempo total do roteiro: {total_final_str}")
+                if total_final_td > timedelta(hours=8, minutes=48):
+                    st.error("⚠️ Tempo total excede o limite de um turno (8h48min).")
+            except Exception as e:
+                st.warning(f"Erro ao interpretar tempo total: {e}")
 
     if botao_exportar and st.session_state.df_preview is not None:
         output = io.BytesIO()
