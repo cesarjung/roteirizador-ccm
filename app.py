@@ -16,7 +16,7 @@ with col1:
 with col2:
     st.markdown(
         """
-        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Obras</h1>
+        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Vistorias</h1>
         """,
         unsafe_allow_html=True
     )
@@ -179,7 +179,7 @@ if st.session_state.df_memoria is not None:
         else:
             ponto_chegada = None
 
-        coordenadas = [[row["Longitude"], row["Latitude"]] for _, row in df_filtrado.iterrows()]
+        coordenadas = [[row["Longitude"], row["Latitude"]] for _, row in df_filtrado.sort_values(by="Projeto").iterrows()]
         coordenadas.insert(0, ponto_partida)
         if ponto_chegada:
             coordenadas.append(ponto_chegada)
