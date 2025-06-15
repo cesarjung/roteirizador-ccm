@@ -24,7 +24,6 @@ with col2:
 ORS_API_KEY = "5b3ce3597851110001cf6248cc2568a203694c3580ce90fb1175c1fb"
 client = openrouteservice.Client(key=ORS_API_KEY)
 
-
 def format_timedelta(td):
     try:
         total_seconds = int(td.total_seconds())
@@ -33,7 +32,6 @@ def format_timedelta(td):
         return f"{h:02}:{m:02}"
     except:
         return "00:00"
-
 
 def parse_tempo(valor):
     try:
@@ -47,7 +45,6 @@ def parse_tempo(valor):
     except:
         pass
     return timedelta(0)
-
 
 cor_por_tipo = {
     "OBRA": "green",
@@ -93,7 +90,6 @@ if botao_online:
             st.error(f"Erro ao carregar base online: {e}")
     else:
         st.warning("Insira o link da planilha online no campo acima.")
-
 elif arquivo:
     df = pd.read_excel(arquivo, header=5)
     st.session_state.df_memoria = df
@@ -179,7 +175,7 @@ if st.session_state.df_memoria is not None:
         else:
             ponto_chegada = None
 
-        coordenadas = [[row["Longitude"], row["Latitude"]] for _, row in df_filtrado.sort_values(by="Projeto").iterrows()]
+        coordenadas = [[row["Longitude"], row["Latitude"]] for _, row in df_filtrado.iterrows()]
         coordenadas.insert(0, ponto_partida)
         if ponto_chegada:
             coordenadas.append(ponto_chegada)
@@ -222,7 +218,6 @@ if st.session_state.df_memoria is not None:
         if "features" in rota:
             rota_layer = folium.GeoJson(data=rota, name="Rota")
             rota_layer.add_to(mapa_rota)
-            folium.LayerControl().add_to(mapa_rota)
         folium.Marker(location=[lat0, lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(mapa_rota)
         if st.session_state.lat1 and st.session_state.lon1:
             folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(mapa_rota)
