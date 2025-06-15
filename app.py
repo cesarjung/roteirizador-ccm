@@ -74,11 +74,12 @@ with col_bt2:
 with col_bt3:
     botao_exportar = st.button("Exportar Rota")
 
-df = None
 if "df_memoria" not in st.session_state:
     st.session_state.df_memoria = None
 if "mapa_rota" not in st.session_state:
     st.session_state.mapa_rota = None
+if "rota_coords" not in st.session_state:
+    st.session_state.rota_coords = []
 
 if botao_online:
     if url_online:
@@ -110,21 +111,6 @@ if st.session_state.df_memoria is not None:
     sel_municipios = st.multiselect("Filtrar por Município:", municipios, default=municipios)
     sel_unidades = st.multiselect("Filtrar por Unidade:", unidades, default=unidades)
     df = df[df['Município'].isin(sel_municipios) & df['Unidade'].isin(sel_unidades)]
-
-    if "df_preview" not in st.session_state:
-        st.session_state.df_preview = None
-    if "df_filtrado" not in st.session_state:
-        st.session_state.df_filtrado = None
-    if "rota" not in st.session_state:
-        st.session_state.rota = None
-    if "lat0" not in st.session_state:
-        st.session_state.lat0 = None
-    if "lon0" not in st.session_state:
-        st.session_state.lon0 = None
-    if "lat1" not in st.session_state:
-        st.session_state.lat1 = None
-    if "lon1" not in st.session_state:
-        st.session_state.lon1 = None
 
     centro = [df['Latitude'].mean(), df['Longitude'].mean()]
     mapa = folium.Map(location=centro, zoom_start=12)
@@ -214,26 +200,27 @@ if st.session_state.df_memoria is not None:
         st.session_state.lat1 = lat1 if ponto_chegada_input else None
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
-        mapa_rota = folium.Map(location=[lat0, lon0], zoom_start=13)
-        if "features" in rota:
-            rota_layer = folium.GeoJson(data=rota, name="Rota")
-            rota_layer.add_to(mapa_rota)
-        folium.Marker(location=[lat0, lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(mapa_rota)
+    if st.session_state.rota:
+        st.subheader("Visualização da Rota")
+        rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
+
+        if "features" in st.session_state.rota:
+            folium.GeoJson(data=st.session_state.rota, name="Rota").add_to(rota_map)
+
+        folium.Marker(location=[st.session_state.lat0, st.session_state.lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(rota_map)
+
         if st.session_state.lat1 and st.session_state.lon1:
-            folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(mapa_rota)
-        for idx, row in df_preview.iterrows():
+            folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(rota_map)
+
+        for idx, row in st.session_state.df_preview.iterrows():
             tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
             folium.Marker(
                 location=[row["Latitude"], row["Longitude"]],
                 tooltip=tooltip_text,
                 icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
-            ).add_to(mapa_rota)
+            ).add_to(rota_map)
 
-        st.session_state.mapa_rota = mapa_rota
-
-    if st.session_state.mapa_rota:
-        st.subheader("Visualização da Rota")
-        st_folium(st.session_state.mapa_rota, width=1400, height=600)
+        st_folium(rota_map, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
         with st.expander("📜 Ver Roteiro Gerado", expanded=True):
