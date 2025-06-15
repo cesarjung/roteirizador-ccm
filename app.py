@@ -131,12 +131,12 @@ if df is not None:
         tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
         folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
 
-    saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
+    st.session_state.mapa_draw = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
 
     if botao_roteirizar:
         polygons = []
-        if saida.get("all_drawings"):
-            for feat in saida["all_drawings"]:
+        if st.session_state.mapa_draw.get("all_drawings"):
+            for feat in st.session_state.mapa_draw["all_drawings"]:
                 if feat.get("geometry", {}).get("type") == "Polygon":
                     coords = feat["geometry"]["coordinates"][0]
                     polygons.append(Polygon([(lon, lat) for lon, lat in coords]))
