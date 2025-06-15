@@ -24,6 +24,7 @@ with col2:
 ORS_API_KEY = "5b3ce3597851110001cf6248cc2568a203694c3580ce90fb1175c1fb"
 client = openrouteservice.Client(key=ORS_API_KEY)
 
+
 def format_timedelta(td):
     try:
         total_seconds = int(td.total_seconds())
@@ -32,6 +33,7 @@ def format_timedelta(td):
         return f"{h:02}:{m:02}"
     except:
         return "00:00"
+
 
 def parse_tempo(valor):
     try:
@@ -45,6 +47,7 @@ def parse_tempo(valor):
     except:
         pass
     return timedelta(0)
+
 
 cor_por_tipo = {
     "OBRA": "green",
@@ -63,14 +66,38 @@ with col_out:
 
 arquivo = st.file_uploader("Selecione o arquivo Excel:", type=["xlsx"])
 
-col_bt1, _, col_bt3 = st.columns([1, 1, 1])
+st.markdown("<br>", unsafe_allow_html=True)
+url_online = st.text_input("URL da planilha online (formato CSV exportável):", value="https://docs.google.com/spreadsheets/d/1xYrdsGwIDmgLh_Syzfzr-_M0lWeaqIHogqhiRgd95_w/export?format=csv")
+
+col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 1])
 with col_bt1:
     botao_roteirizar = st.button("Atualizar Rota")
+with col_bt2:
+    botao_online = st.button("BD Online")
 with col_bt3:
     botao_exportar = st.button("Exportar Rota")
 
-if arquivo:
+df = None
+if "df_memoria" not in st.session_state:
+    st.session_state.df_memoria = None
+
+if botao_online:
+    if url_online:
+        try:
+            df_online = pd.read_csv(url_online, header=5)
+            st.session_state.df_memoria = df_online
+            st.success("Base online carregada com sucesso!")
+        except Exception as e:
+            st.error(f"Erro ao carregar base online: {e}")
+    else:
+        st.warning("Insira o link da planilha online no campo acima.")
+
+elif arquivo:
     df = pd.read_excel(arquivo, header=5)
+    st.session_state.df_memoria = df
+
+if st.session_state.df_memoria is not None:
+    df = st.session_state.df_memoria.copy()
 
     if 'Latitude' not in df or 'Longitude' not in df:
         st.error("Colunas Latitude e Longitude não encontradas.")
@@ -85,21 +112,6 @@ if arquivo:
     sel_municipios = st.multiselect("Filtrar por Município:", municipios, default=municipios)
     sel_unidades = st.multiselect("Filtrar por Unidade:", unidades, default=unidades)
     df = df[df['Município'].isin(sel_municipios) & df['Unidade'].isin(sel_unidades)]
-
-    with st.container():
-        centro = [df['Latitude'].mean(), df['Longitude'].mean()]
-        mapa = folium.Map(location=centro, zoom_start=12)
-        Fullscreen().add_to(mapa)
-        draw = Draw(export=True, draw_options={"polyline": False,"rectangle": True,"circle": False,"circlemarker": False,"marker": True,"polygon": True})
-        draw.add_to(mapa)
-        cluster = MarkerCluster().add_to(mapa)
-
-        for _, row in df.iterrows():
-            cor = cor_por_tipo.get(str(row.get("TIPO", "")).strip(), "gray")
-            tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
-            folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
-
-        saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
 
     if "df_preview" not in st.session_state:
         st.session_state.df_preview = None
@@ -116,10 +128,24 @@ if arquivo:
     if "lon1" not in st.session_state:
         st.session_state.lon1 = None
 
+    centro = [df['Latitude'].mean(), df['Longitude'].mean()]
+    mapa = folium.Map(location=centro, zoom_start=12)
+    Fullscreen().add_to(mapa)
+    draw = Draw(export=True, draw_options={"polyline": False, "rectangle": True, "circle": False, "circlemarker": False, "marker": True, "polygon": True})
+    draw.add_to(mapa)
+    cluster = MarkerCluster().add_to(mapa)
+
+    for _, row in df.iterrows():
+        cor = cor_por_tipo.get(str(row.get("TIPO", "")).strip(), "gray")
+        tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
+        folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
+
+    st.session_state.mapa_draw = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
+
     if botao_roteirizar:
         polygons = []
-        if saida.get("all_drawings"):
-            for feat in saida["all_drawings"]:
+        if st.session_state.mapa_draw.get("all_drawings"):
+            for feat in st.session_state.mapa_draw["all_drawings"]:
                 if feat.get("geometry", {}).get("type") == "Polygon":
                     coords = feat["geometry"]["coordinates"][0]
                     polygons.append(Polygon([(lon, lat) for lon, lat in coords]))
@@ -186,28 +212,20 @@ if arquivo:
         st.session_state.lat1 = lat1 if ponto_chegada_input else None
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
-    if st.session_state.rota:
-        with st.container():
-            st.subheader("Visualização da Rota")
-            rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
-
-            if "features" in st.session_state.rota:
-                folium.GeoJson(data=st.session_state.rota, name="Rota").add_to(rota_map)
-
-            folium.Marker(location=[st.session_state.lat0, st.session_state.lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(rota_map)
-
-            if st.session_state.lat1 and st.session_state.lon1:
-                folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(rota_map)
-
-            for idx, row in st.session_state.df_preview.iterrows():
-                tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
-                folium.Marker(
-                    location=[row["Latitude"], row["Longitude"]],
-                    tooltip=tooltip_text,
-                    icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
-                ).add_to(rota_map)
-
-            st_folium(rota_map, width=1400, height=600)
+        mapa_rota = folium.Map(location=[lat0, lon0], zoom_start=13)
+        if "features" in rota:
+            folium.GeoJson(data=rota, name="Rota").add_to(mapa_rota)
+        folium.Marker(location=[lat0, lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(mapa_rota)
+        if lat1 and lon1:
+            folium.Marker(location=[lat1, lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(mapa_rota)
+        for idx, row in df_preview.iterrows():
+            tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
+            folium.Marker(
+                location=[row["Latitude"], row["Longitude"]],
+                tooltip=tooltip_text,
+                icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
+            ).add_to(mapa_rota)
+        st_folium(mapa_rota, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
         with st.expander("📜 Ver Roteiro Gerado", expanded=True):
