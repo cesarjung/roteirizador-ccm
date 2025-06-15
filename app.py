@@ -104,24 +104,6 @@ if df is not None:
     sel_unidades = st.multiselect("Filtrar por Unidade:", unidades, default=unidades)
     df = df[df['Município'].isin(sel_municipios) & df['Unidade'].isin(sel_unidades)]
 
-    mapa_container = st.container()
-    rota_placeholder = st.container()
-
-    with mapa_container:
-        centro = [df['Latitude'].mean(), df['Longitude'].mean()]
-        mapa = folium.Map(location=centro, zoom_start=12)
-        Fullscreen().add_to(mapa)
-        draw = Draw(export=True, draw_options={"polyline": False,"rectangle": True,"circle": False,"circlemarker": False,"marker": True,"polygon": True})
-        draw.add_to(mapa)
-        cluster = MarkerCluster().add_to(mapa)
-
-        for _, row in df.iterrows():
-            cor = cor_por_tipo.get(str(row.get("TIPO", "")).strip(), "gray")
-            tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
-            folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
-
-        saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
-
     if "df_preview" not in st.session_state:
         st.session_state.df_preview = None
     if "df_filtrado" not in st.session_state:
@@ -136,6 +118,20 @@ if df is not None:
         st.session_state.lat1 = None
     if "lon1" not in st.session_state:
         st.session_state.lon1 = None
+
+    centro = [df['Latitude'].mean(), df['Longitude'].mean()]
+    mapa = folium.Map(location=centro, zoom_start=12)
+    Fullscreen().add_to(mapa)
+    draw = Draw(export=True, draw_options={"polyline": False,"rectangle": True,"circle": False,"circlemarker": False,"marker": True,"polygon": True})
+    draw.add_to(mapa)
+    cluster = MarkerCluster().add_to(mapa)
+
+    for _, row in df.iterrows():
+        cor = cor_por_tipo.get(str(row.get("TIPO", "")).strip(), "gray")
+        tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
+        folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
+
+    saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
 
     if botao_roteirizar:
         polygons = []
@@ -207,20 +203,20 @@ if df is not None:
         st.session_state.lat1 = lat1 if ponto_chegada_input else None
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
-        rota_map = folium.Map(location=[lat0, lon0], zoom_start=13)
+        mapa_rota = folium.Map(location=[lat0, lon0], zoom_start=13)
         if "features" in rota:
-            folium.GeoJson(data=rota, name="Rota").add_to(rota_map)
-        folium.Marker(location=[lat0, lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(rota_map)
+            folium.GeoJson(data=rota, name="Rota").add_to(mapa_rota)
+        folium.Marker(location=[lat0, lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(mapa_rota)
         if lat1 and lon1:
-            folium.Marker(location=[lat1, lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(rota_map)
+            folium.Marker(location=[lat1, lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(mapa_rota)
         for idx, row in df_preview.iterrows():
             tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
             folium.Marker(
                 location=[row["Latitude"], row["Longitude"]],
                 tooltip=tooltip_text,
                 icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
-            ).add_to(rota_map)
-        rota_placeholder.folium_chart(rota_map, width=1400, height=600)
+            ).add_to(mapa_rota)
+        st_folium(mapa_rota, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
         with st.expander("📜 Ver Roteiro Gerado", expanded=True):
