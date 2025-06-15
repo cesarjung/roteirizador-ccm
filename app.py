@@ -63,6 +63,9 @@ with col_out:
 
 arquivo = st.file_uploader("Selecione o arquivo Excel:", type=["xlsx"])
 
+st.markdown("<br>", unsafe_allow_html=True)
+url_online = st.text_input("URL da planilha online (formato CSV exportável):")
+
 col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 1])
 with col_bt1:
     botao_roteirizar = st.button("Atualizar Rota")
@@ -74,13 +77,14 @@ with col_bt3:
 df = None
 
 if botao_online:
-    url_online = st.text_input("Insira o URL da planilha (formato CSV exportável):")
     if url_online:
         try:
             df = pd.read_csv(url_online, header=5)
             st.success("Base online carregada com sucesso!")
         except Exception as e:
             st.error(f"Erro ao carregar base online: {e}")
+    else:
+        st.warning("Insira o link da planilha online no campo acima.")
 
 elif arquivo:
     df = pd.read_excel(arquivo, header=5)
@@ -101,7 +105,7 @@ if df is not None:
     df = df[df['Município'].isin(sel_municipios) & df['Unidade'].isin(sel_unidades)]
 
     mapa_container = st.container()
-    rota_placeholder = st.empty()
+    rota_placeholder = st.container()
 
     with mapa_container:
         centro = [df['Latitude'].mean(), df['Longitude'].mean()]
