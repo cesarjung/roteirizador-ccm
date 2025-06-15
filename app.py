@@ -80,6 +80,8 @@ with col_bt3:
 df = None
 if "df_memoria" not in st.session_state:
     st.session_state.df_memoria = None
+if "mapa_rota" not in st.session_state:
+    st.session_state.mapa_rota = None
 
 if botao_online:
     if url_online:
@@ -229,7 +231,12 @@ if st.session_state.df_memoria is not None:
                 tooltip=tooltip_text,
                 icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
             ).add_to(mapa_rota)
-        st_folium(mapa_rota, width=1400, height=600)
+
+        st.session_state.mapa_rota = mapa_rota
+
+    if st.session_state.mapa_rota:
+        st.subheader("Visualização da Rota")
+        st_folium(st.session_state.mapa_rota, width=1400, height=600)
 
     if st.session_state.df_preview is not None:
         with st.expander("📜 Ver Roteiro Gerado", expanded=True):
