@@ -220,7 +220,9 @@ if st.session_state.df_memoria is not None:
 
         mapa_rota = folium.Map(location=[lat0, lon0], zoom_start=13)
         if "features" in rota:
-            folium.GeoJson(data=rota, name="Rota").add_to(mapa_rota)
+            rota_layer = folium.GeoJson(data=rota, name="Rota")
+            rota_layer.add_to(mapa_rota)
+            folium.LayerControl().add_to(mapa_rota)
         folium.Marker(location=[lat0, lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(mapa_rota)
         if st.session_state.lat1 and st.session_state.lon1:
             folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(mapa_rota)
