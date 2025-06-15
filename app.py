@@ -16,7 +16,7 @@ with col1:
 with col2:
     st.markdown(
         """
-        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Obras</h1>
+        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Vistorias</h1>
         """,
         unsafe_allow_html=True
     )
@@ -220,8 +220,8 @@ if st.session_state.df_memoria is not None:
         if "features" in rota:
             folium.GeoJson(data=rota, name="Rota").add_to(mapa_rota)
         folium.Marker(location=[lat0, lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(mapa_rota)
-        if lat1 and lon1:
-            folium.Marker(location=[lat1, lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(mapa_rota)
+        if st.session_state.lat1 and st.session_state.lon1:
+            folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(mapa_rota)
         for idx, row in df_preview.iterrows():
             tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
             folium.Marker(
