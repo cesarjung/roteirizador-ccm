@@ -16,7 +16,7 @@ with col1:
 with col2:
     st.markdown(
         """
-        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Vistorias</h1>
+        <h1 style='font-size:32px; margin-top:5px;'>CCM - Roteirizador de Obras</h1>
         """,
         unsafe_allow_html=True
     )
@@ -193,6 +193,10 @@ if st.session_state.df_memoria is not None:
 
         df_preview = df_filtrado.reset_index(drop=True)
         df_preview.insert(0, "Ordem", range(1, len(df_preview) + 1))
+
+        if "TEMPO" not in df_preview.columns:
+            df_preview["TEMPO"] = "00:00"
+
         df_preview["Tempo Execução"] = df_preview["TEMPO"].apply(parse_tempo)
         df_preview["Tempo Deslocamento"] = duracoes[:len(df_preview)]
         df_preview["Total Acumulado"] = (df_preview["Tempo Execução"] + df_preview["Tempo Deslocamento"]).cumsum()
