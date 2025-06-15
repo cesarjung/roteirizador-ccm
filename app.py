@@ -86,20 +86,19 @@ if arquivo:
     sel_unidades = st.multiselect("Filtrar por Unidade:", unidades, default=unidades)
     df = df[df['Município'].isin(sel_municipios) & df['Unidade'].isin(sel_unidades)]
 
-    with st.container():
-        centro = [df['Latitude'].mean(), df['Longitude'].mean()]
-        mapa = folium.Map(location=centro, zoom_start=12)
-        Fullscreen().add_to(mapa)
-        draw = Draw(export=True, draw_options={"polyline": False,"rectangle": True,"circle": False,"circlemarker": False,"marker": True,"polygon": True})
-        draw.add_to(mapa)
-        cluster = MarkerCluster().add_to(mapa)
+    centro = [df['Latitude'].mean(), df['Longitude'].mean()]
+    mapa = folium.Map(location=centro, zoom_start=12)
+    Fullscreen().add_to(mapa)
+    draw = Draw(export=True, draw_options={"polyline": False,"rectangle": True,"circle": False,"circlemarker": False,"marker": True,"polygon": True})
+    draw.add_to(mapa)
+    cluster = MarkerCluster().add_to(mapa)
 
-        for _, row in df.iterrows():
-            cor = cor_por_tipo.get(str(row.get("TIPO", "")).strip(), "gray")
-            tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
-            folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
+    for _, row in df.iterrows():
+        cor = cor_por_tipo.get(str(row.get("TIPO", "")).strip(), "gray")
+        tooltip_text = f"{row.get('TIPO', '')} - {row.get('Projeto', '')}"
+        folium.Marker(location=[row["Latitude"], row["Longitude"]], tooltip=tooltip_text, icon=folium.Icon(color=cor)).add_to(cluster)
 
-        saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
+    saida = st_folium(mapa, width=1400, height=600, returned_objects=["all_drawings"])
 
     if "df_preview" not in st.session_state:
         st.session_state.df_preview = None
@@ -187,27 +186,27 @@ if arquivo:
         st.session_state.lon1 = lon1 if ponto_chegada_input else None
 
     if st.session_state.rota:
-        with st.container():
-            st.subheader("Visualização da Rota")
-            rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
+        st.markdown("<div style='margin-top:-60px;'>", unsafe_allow_html=True)
+        rota_map = folium.Map(location=[st.session_state.lat0, st.session_state.lon0], zoom_start=13)
 
-            if "features" in st.session_state.rota:
-                folium.GeoJson(data=st.session_state.rota, name="Rota").add_to(rota_map)
+        if "features" in st.session_state.rota:
+            folium.GeoJson(data=st.session_state.rota, name="Rota").add_to(rota_map)
 
-            folium.Marker(location=[st.session_state.lat0, st.session_state.lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(rota_map)
+        folium.Marker(location=[st.session_state.lat0, st.session_state.lon0], tooltip="Partida", icon=folium.Icon(color="green")).add_to(rota_map)
 
-            if st.session_state.lat1 and st.session_state.lon1:
-                folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(rota_map)
+        if st.session_state.lat1 and st.session_state.lon1:
+            folium.Marker(location=[st.session_state.lat1, st.session_state.lon1], tooltip="Chegada", icon=folium.Icon(color="red")).add_to(rota_map)
 
-            for idx, row in st.session_state.df_preview.iterrows():
-                tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
-                folium.Marker(
-                    location=[row["Latitude"], row["Longitude"]],
-                    tooltip=tooltip_text,
-                    icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
-                ).add_to(rota_map)
+        for idx, row in st.session_state.df_preview.iterrows():
+            tooltip_text = f"{row['TIPO']} - {row['Projeto']}"
+            folium.Marker(
+                location=[row["Latitude"], row["Longitude"]],
+                tooltip=tooltip_text,
+                icon=folium.DivIcon(html=f"<div style='font-size: 12pt; color: black;'><b>{idx + 1}</b></div>")
+            ).add_to(rota_map)
 
-            st_folium(rota_map, width=1400, height=600)
+        st_folium(rota_map, width=1400, height=600)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     if st.session_state.df_preview is not None:
         with st.expander("📜 Ver Roteiro Gerado", expanded=True):
